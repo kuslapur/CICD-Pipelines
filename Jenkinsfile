@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent linux-node
 
     environment {
         AWS_REGION = "ap-south-1"
