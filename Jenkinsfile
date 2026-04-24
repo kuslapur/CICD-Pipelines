@@ -22,26 +22,23 @@ pipeline {
 
         stage('Terraform Plan') {
             steps {
-                sh 'terraform plan -out=tfplan'
+                sh 'terraform plan'
             }
         }
 
         stage('Terraform Apply') {
             steps {
-                sh 'terraform apply -auto-approve tfplan'
+                sh 'terraform apply -auto-approve'
             }
         }
-
     }
-        post {
-            success {
-                echo 'Pipeline executed successfully!'
-            }
-            failure {
-                echo 'Pipeline failed. Please check the logs for details.'
-            }
 
-            }
+    post {
+        success {
+            echo 'EC2 Instance Created Successfully!'
         }
-    
-
+        failure {
+            echo 'Pipeline Failed!'
+        }
+    }
+}
