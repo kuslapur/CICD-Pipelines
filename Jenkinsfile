@@ -14,7 +14,7 @@ pipeline {
             }
         }
 
-       stage('Terraform Init'){
+       stage('Terraform Init') {
             steps {
                 sh 'terraform init'
             }
@@ -32,6 +32,7 @@ pipeline {
             }
         }
 
+    }
         post {
             success {
                 echo 'Pipeline executed successfully!'
@@ -42,5 +43,5 @@ pipeline {
 
             }
         }
-    }
+    
 
