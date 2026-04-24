@@ -3,10 +3,7 @@ pipeline {
 
     environment {
         AWS_REGION = "ap-south-1"
-        ACCOUNT_ID = "026296208980"   // change
-        ECR_REPO = "eks-app"
-        IMAGE_TAG = "${BUILD_NUMBER}"
-        CLUSTER_NAME = "my-eks-clustor"
+        
     }
 
     stages {
@@ -17,45 +14,33 @@ pipeline {
             }
         }
 
-        stage('Build Image') {
+       stage('Terraform Init'){
             steps {
-                sh 'docker build -t $ECR_REPO:$IMAGE_TAG .'
+                sh 'terraform init'
             }
         }
 
-        stage('Login to ECR') {
+        stage('Terraform Plan') {
             steps {
-                sh '''
-                aws ecr get-login-password --region $AWS_REGION | \
-                docker login --username AWS --password-stdin \
-                $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
-                '''
+                sh 'terraform plan -out=tfplan'
             }
         }
 
-        stage('Push Image') {
+        stage('Terraform Apply') {
             steps {
-                sh '''
-                docker tag $ECR_REPO:$IMAGE_TAG \
-                $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
-
-                docker push \
-                $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
-                '''
+                sh 'terraform apply -auto-approve tfplan'
             }
         }
 
-        stage('Deploy to EKS') {
-            steps {
-                sh '''
-                aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME
+        post {
+            success {
+                echo 'Pipeline executed successfully!'
+            }
+            failure {
+                echo 'Pipeline failed. Please check the logs for details.'
+            }
 
-                kubectl set image deployment/eks-app \
-                eks-app=$ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
-
-                kubectl rollout status deployment/eks-app
-                '''
             }
         }
     }
-}
+
