@@ -10,3 +10,5 @@ resource "aws_instance" "Instance_from_jenkins" {
   tags = {
 	Name = "Jenkins_Instance"
   }
+
+}
